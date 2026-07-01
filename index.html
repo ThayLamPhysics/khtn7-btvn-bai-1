@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hóa Học 7 - Cấu Tạo Nguyên Tử | Thầy Lâm</title>
+    
+    <!-- Tailwind CSS cho Giao diện -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Cấu hình MathJax cho các công thức Hóa học/Toán học -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            chtml: {
+                matchFontHeight: false
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <!-- Thêm font Quicksand cho phong cách cute pastel -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Các Style Tùy chỉnh (Animations, Tab active, etc.) -->
+    <style>
+        body { font-family: 'Quicksand', sans-serif; }
+        
+        /* Hiệu ứng bìa sách khi Bắt đầu học */
+        .cover-hidden {
+            transform: translateY(-100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Nút Tab Desktop */
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .active-tab {
+            background-color: #4f46e5; /* indigo-600 */
+            color: #ffffff;
+            font-weight: bold;
+            border-bottom: 4px solid #22d3ee; /* cyan-400 */
+        }
+        .tab-button:not(.active-tab):hover {
+            background-color: #4338ca; /* indigo-700 */
+            color: #e0e7ff; /* indigo-100 */
+        }
+
+        /* Nút Tab Mobile */
+        .mobile-tab-button {
+            transition: all 0.3s ease;
+        }
+        .active-mobile-tab {
+            background-color: #ecfeff; /* cyan-50 */
+            color: #0e7490; /* cyan-700 */
+            border-left: 4px solid #06b6d4; /* cyan-500 */
+            font-weight: bold;
+        }
+
+        /* Gradient Nút Chính */
+        .btn-primary {
+            background: linear-gradient(to right, #06b6d4, #2563eb); /* cyan-500 to blue-600 */
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            color: white;
+            border: none;
+        }
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(6, 182, 212, 0.4);
+        }
+
+        /* Nút Phụ */
+        .btn-secondary {
+            background-color: #e2e8f0; /* slate-200 */
+            color: #334155; /* slate-700 */
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn-secondary:hover {
+            background-color: #cbd5e1; /* slate-300 */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* SVG Animations */
+        .pulsate {
+            animation: pulse-animation 2s infinite ease-in-out alternate;
+        }
+        @keyframes pulse-animation {
+            0% { transform: scale(0.95); opacity: 0.9; }
+            100% { transform: scale(1.05); opacity: 1; }
+        }
+
+        .orbit {
+            animation: spin-orbit linear infinite;
+            transform-origin: center;
+        }
+        .orbit-fast { animation-duration: 3s; }
+        .orbit-slow { animation-duration: 5s; }
+        @keyframes spin-orbit {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Cân bằng Simulation */
+        .scale-beam {
+            transition: transform 0.5s ease-in-out;
+            transform-origin: center;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-700 min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <!-- TRANG MỞ ĐẦU (BÌA SÁCH) -->
+    <div id="cover-page" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-indigo-900 via-blue-800 to-cyan-700 transition-all duration-700 ease-in-out text-white p-6 text-center">
+        <div class="bg-white/10 p-10 rounded-[3rem] backdrop-blur-md shadow-2xl shadow-cyan-500/20 border border-white/20 max-w-2xl w-full">
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-sm text-cyan-300">Cấu Tạo Nguyên Tử</h1>
+            <p class="text-xl md:text-2xl mb-2 font-bold text-blue-200">Môn: Hóa Học - Lớp 7</p>
+            <div class="my-8 w-24 h-1.5 bg-cyan-400 mx-auto rounded-full shadow-lg"></div>
+            <p class="text-lg md:text-xl italic mb-10 text-cyan-100 font-medium">"Mọi hạt cát nhỏ bé đều chứa đựng cả một vũ trụ thu nhỏ."<br><br>Giáo viên: Thầy Lâm 🚀</p>
+            
+            <button id="start-btn" class="btn-primary font-bold py-4 px-10 rounded-full text-xl shadow-lg shadow-cyan-500/30 flex items-center justify-center mx-auto">
+                Bắt đầu khám phá
+                <svg class="w-6 h-6 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT APP -->
+    
+    <!-- Header & Mobile Navbar -->
+    <nav class="bg-indigo-900 text-white sticky top-0 z-30 shadow-lg">
+        <!-- Thanh điều hướng Cố định -->
+        <div class="flex justify-between items-center p-4 lg:px-8">
+            <div class="flex items-center space-x-2 text-xl font-extrabold text-cyan-300">
+                <svg class="w-8 h-8 text-cyan-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                <span>Hóa Học Cùng Thầy Lâm</span>
+            </div>
+            
+            <!-- Nút Hamburger (Chỉ hiện Mobile) -->
+            <button id="hamburger-button" class="lg:hidden text-cyan-300 hover:text-white focus:outline-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </div>
+
+        <!-- Desktop Tabs (Ẩn trên Mobile) -->
+        <div class="hidden lg:flex bg-indigo-950 justify-center shadow-inner border-t border-indigo-800">
+            <button class="tab-button px-6 py-3 text-indigo-200 font-bold hover:bg-indigo-800" data-target="tab-intro">Giới thiệu</button>
+            <button class="tab-button px-6 py-3 text-indigo-200 font-bold hover:bg-indigo-800" data-target="tab-1">1. Hạt nhân</button>
+            <button class="tab-button px-6 py-3 text-indigo-200 font-bold hover:bg-indigo-800" data-target="tab-2">2. Vỏ nguyên tử</button>
+            <button class="tab-button px-6 py-3 text-indigo-200 font-bold hover:bg-indigo-800" data-target="tab-3">3. Sự trung hòa</button>
+            <button class="tab-button px-6 py-3 text-indigo-200 font-bold hover:bg-indigo-800" data-target="tab-test">Kiểm tra</button>
+        </div>
+    </nav>
+
+    <!-- Mobile Sidebar Menu (Slide từ trái) -->
+    <div id="mobile-menu" class="fixed inset-y-0 left-0 z-40 w-64 bg-white transform -translate-x-full transition-transform duration-300 lg:hidden shadow-2xl flex flex-col pt-16 border-r border-slate-200">
+        <button id="close-menu-button" class="absolute top-4 right-4 text-slate-400 hover:text-cyan-600 focus:outline-none">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <div class="flex-1 flex flex-col mt-4">
+            <button class="mobile-tab-button text-left px-6 py-4 text-slate-600 font-bold hover:bg-slate-50 border-b border-slate-100" data-target="tab-intro">Giới thiệu</button>
+            <button class="mobile-tab-button text-left px-6 py-4 text-slate-600 font-bold hover:bg-slate-50 border-b border-slate-100" data-target="tab-1">1. Hạt nhân</button>
+            <button class="mobile-tab-button text-left px-6 py-4 text-slate-600 font-bold hover:bg-slate-50 border-b border-slate-100" data-target="tab-2">2. Vỏ nguyên tử</button>
+            <button class="mobile-tab-button text-left px-6 py-4 text-slate-600 font-bold hover:bg-slate-50 border-b border-slate-100" data-target="tab-3">3. Sự trung hòa</button>
+            <button class="mobile-tab-button text-left px-6 py-4 text-slate-600 font-bold hover:bg-slate-50 border-b border-slate-100" data-target="tab-test">Kiểm tra</button>
+        </div>
+    </div>
+    
+    <!-- Mobile Menu Overlay (Click ra ngoài để đóng) -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-slate-900/60 z-30 hidden lg:hidden backdrop-blur-sm"></div>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow container mx-auto p-4 md:p-8 max-w-5xl">
+
+        <!-- TAB GIỚI THIỆU -->
+        <div id="tab-intro" class="tab-content hidden">
+            <div class="bg-white rounded-[2rem] p-6 md:p-10 shadow-xl shadow-slate-200/50 border border-slate-200">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center text-cyan-600">
+                        <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
+                    </div>
+                    <h2 class="text-3xl font-extrabold text-indigo-800">Câu chuyện về Ngôi Làng Vật Chất</h2>
+                </div>
+                
+                <div class="space-y-4 text-lg leading-relaxed text-slate-600 font-medium">
+                    <p>Chào các bạn nhỏ, thầy là Lâm! Cảm ơn các em đã bước qua cánh cửa kỳ diệu để đến với bài học hôm nay. Mọi vật xung quanh chúng ta: cái bàn, cái ghế, hòn đá hay một giọt nước... đều được xây nên từ những "viên gạch" vô hình vô cùng nhỏ bé. Những viên gạch đó được gọi là <strong class="text-cyan-600">Nguyên tử</strong>.</p>
+                    <p>Hãy tưởng tượng mỗi Nguyên tử là một ngôi làng kỳ lạ. Trong ngôi làng này, quy luật hoạt động của cư dân không giống thế giới của chúng ta. Ở giữa làng có một tòa tháp kiên cố, vô cùng nặng nề nhưng kích thước cực kỳ nhỏ hẹp, chứa những cư dân không bao giờ rời khỏi nhà. Xung quanh tòa tháp ấy, cách một khoảng rất xa, lại có những cư dân nhỏ bé bay lượn liên tục với tốc độ chóng mặt không ngừng nghỉ.</p>
+                    <p>Hôm nay, thầy trò chúng ta sẽ cùng đi khám phá xem những cư dân đó là ai, mang đặc điểm gì, và vì sao ngôi làng bé nhỏ ấy lại là nền tảng tạo nên cả thế giới này nhé! ✨</p>
+                </div>
+
+                <div class="mt-8 flex justify-end">
+                    <button class="btn-primary font-bold py-3 px-8 rounded-full shadow-md tab-switch-btn" data-target="tab-1">
+                        Khám phá Hạt nhân 🚀
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 1: HẠT NHÂN NGUYÊN TỬ -->
+        <div id="tab-1" class="tab-content hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                
+                <!-- Nội dung Kiến thức -->
+                <div class="bg-white p-6 rounded-[2rem] shadow-lg shadow-slate-200/50 border-l-4 border-indigo-500">
+                    <h2 class="text-2xl font-extrabold text-indigo-700 mb-4">1. Hạt Nhân Nguyên Tử</h2>
+                    <p class="mb-4 text-slate-600 font-medium">"Tòa tháp trung tâm" của ngôi làng nguyên tử chính là <strong class="text-indigo-600">Hạt nhân</strong>. Mặc dù chiếm kích thước vô cùng nhỏ bé so với toàn bộ nguyên tử, nhưng hạt nhân lại chứa gần như toàn bộ khối lượng của nó!</p>
+                    
+                    <div class="bg-slate-100 p-4 rounded-2xl mb-4 border border-slate-200">
+                        <h3 class="font-bold text-slate-700 mb-2">Tóm tắt cư dân (Hạt cấu tạo):</h3>
+                        <ul class="list-disc list-inside space-y-2 text-slate-800 font-medium">
+                            <li><strong>Proton (p):</strong> Mỗi proton mang 1 đơn vị điện tích dương ($+1$). Khối lượng $\approx 1 \text{ amu}$.</li>
+                            <li><strong>Neutron (n):</strong> Là "người hòa giải", không mang điện tích ($0$). Khối lượng $\approx 1 \text{ amu}$.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-100">
+                        <h3 class="font-bold text-indigo-800 mb-2">Công thức cần nhớ:</h3>
+                        <p class="mb-2 text-indigo-900 font-medium">Điện tích hạt nhân do Proton quyết định. Số điện tích hạt nhân (Z) bằng số Proton (P):</p>
+                        <p class="text-xl text-center font-bold my-3 text-indigo-600 bg-white py-2 rounded-xl shadow-sm">$$ Z = P $$</p>
+                        <p class="text-indigo-900"><strong>Ví dụ:</strong> Nguyên tử Carbon có 6 proton $\rightarrow$ Điện tích hạt nhân là $+6$.</p>
+                    </div>
+                </div>
+
+                <!-- Simulation SVG -->
+                <div class="bg-white p-6 rounded-[2rem] shadow-lg shadow-slate-200/50 flex flex-col items-center justify-center h-full">
+                    <h3 class="text-lg font-extrabold text-indigo-700 mb-4 text-center">Mô phỏng: Hạt nhân rung động</h3>
+                    <p class="text-sm text-slate-500 font-medium text-center mb-6">Sự gắn kết chặt chẽ của Proton (+) và Neutron</p>
+                    
+                    <svg width="200" height="200" viewBox="0 0 100 100" class="pulsate">
+                        <!-- Nền sáng tỏa ra -->
+                        <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#818cf8" stop-opacity="0.5" />
+                            <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+                        </radialGradient>
+                        <circle cx="50" cy="50" r="45" fill="url(#glow)" />
+                        
+                        <!-- Proton (+) - Màu đỏ -->
+                        <g transform="translate(50,50)">
+                            <!-- Cụm hạt nhân -->
+                            <circle cx="-10" cy="-10" r="12" fill="#ef4444" />
+                            <text x="-10" y="-5" fill="white" font-size="12" text-anchor="middle" font-weight="bold">+</text>
+                            
+                            <circle cx="10" cy="12" r="12" fill="#ef4444" />
+                            <text x="10" y="17" fill="white" font-size="12" text-anchor="middle" font-weight="bold">+</text>
+                            
+                            <!-- Neutron - Màu xám bạc -->
+                            <circle cx="12" cy="-8" r="12" fill="#94a3b8" />
+                            <circle cx="-8" cy="10" r="12" fill="#94a3b8" />
+                            <circle cx="0" cy="0" r="12" fill="#ef4444" />
+                            <text x="0" y="5" fill="white" font-size="12" text-anchor="middle" font-weight="bold">+</text>
+                            <circle cx="-2" cy="-18" r="12" fill="#94a3b8" />
+                        </g>
+                    </svg>
+                    
+                    <div class="flex space-x-4 mt-6">
+                        <div class="flex items-center text-sm font-semibold text-slate-600"><span class="w-4 h-4 bg-red-500 rounded-full mr-2"></span> Proton (+)</div>
+                        <div class="flex items-center text-sm font-semibold text-slate-600"><span class="w-4 h-4 bg-slate-400 rounded-full mr-2"></span> Neutron</div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 flex justify-between">
+                <button class="btn-secondary font-bold py-2 px-6 rounded-xl tab-switch-btn" data-target="tab-intro">Quay lại</button>
+                <button class="btn-primary font-bold py-2 px-6 rounded-xl tab-switch-btn" data-target="tab-2">Khám phá Vỏ nguyên tử</button>
+            </div>
+        </div>
+
+        <!-- TAB 2: VỎ NGUYÊN TỬ -->
+        <div id="tab-2" class="tab-content hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                
+                <!-- Nội dung Kiến thức -->
+                <div class="bg-white p-6 rounded-[2rem] shadow-lg shadow-slate-200/50 border-l-4 border-cyan-500">
+                    <h2 class="text-2xl font-extrabold text-cyan-700 mb-4">2. Vỏ Nguyên Tử</h2>
+                    <p class="mb-4 text-slate-600 font-medium">Nếu hạt nhân là tòa tháp đứng yên tĩnh lặng, thì <strong class="text-cyan-600">Vỏ nguyên tử</strong> lại vô cùng nhộn nhịp! Vỏ được tạo nên bởi các hạt siêu nhẹ, bay với tốc độ hàng ngàn km/s xung quanh hạt nhân, giống như những bầy ong bảo vệ tổ. 🐝</p>
+                    
+                    <div class="bg-slate-100 p-4 rounded-2xl mb-4 border border-slate-200">
+                        <h3 class="font-bold text-slate-700 mb-2">Tóm tắt cư dân:</h3>
+                        <ul class="list-disc list-inside space-y-2 text-slate-800 font-medium">
+                            <li><strong>Electron (e):</strong> Mỗi electron mang 1 đơn vị điện tích âm ($-1$).</li>
+                            <li><strong>Khối lượng:</strong> Cực kỳ bé, $\approx 0.00055 \text{ amu}$ (coi như bằng không). Khối lượng nguyên tử chủ yếu ở hạt nhân.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-cyan-50 p-4 rounded-2xl border border-cyan-100">
+                        <h3 class="font-bold text-cyan-800 mb-2">Đặc điểm lớp vỏ:</h3>
+                        <p class="text-cyan-900 font-medium">Các electron xếp thành từng <strong>Lớp</strong> (K, L, M, N...) từ trong ra ngoài. Lớp trong cùng luôn được lấp đầy trước.</p>
+                        <p class="mt-2 text-sm italic text-cyan-800">Ví dụ: Nguyên tử Oxi (8 e) có 2 lớp: lớp thứ nhất có 2 e, lớp thứ hai có 6 e.</p>
+                    </div>
+                </div>
+
+                <!-- Simulation SVG -->
+                <div class="bg-white p-6 rounded-[2rem] shadow-lg shadow-slate-200/50 flex flex-col items-center justify-center h-full">
+                    <h3 class="text-lg font-extrabold text-cyan-700 mb-4 text-center">Mô phỏng: Sự chuyển động của Electron</h3>
+                    <p class="text-sm text-slate-500 font-medium text-center mb-6">Mô hình Nguyên tử Liti (Li) có 3 e</p>
+                    
+                    <svg width="250" height="250" viewBox="0 0 200 200">
+                        <!-- Hạt nhân -->
+                        <circle cx="100" cy="100" r="15" fill="#ef4444" />
+                        <text x="100" y="105" fill="white" font-size="14" text-anchor="middle" font-weight="bold">+3</text>
+                        
+                        <!-- Lớp electron thứ 1 (Quỹ đạo 1) -->
+                        <g class="orbit orbit-fast">
+                            <circle cx="100" cy="100" r="40" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4,4" />
+                            <!-- Electron 1 -->
+                            <circle cx="100" cy="60" r="7" fill="#06b6d4" />
+                            <text x="100" y="64" fill="white" font-size="10" text-anchor="middle" font-bold="true">-</text>
+                            <!-- Electron 2 -->
+                            <circle cx="100" cy="140" r="7" fill="#06b6d4" />
+                            <text x="100" y="144" fill="white" font-size="10" text-anchor="middle" font-bold="true">-</text>
+                        </g>
+
+                        <!-- Lớp electron thứ 2 (Quỹ đạo 2) -->
+                        <g class="orbit orbit-slow" style="animation-direction: reverse;">
+                            <circle cx="100" cy="100" r="75" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4,4" />
+                            <!-- Electron 3 -->
+                            <circle cx="25" cy="100" r="7" fill="#06b6d4" />
+                            <text x="25" y="104" fill="white" font-size="10" text-anchor="middle" font-bold="true">-</text>
+                        </g>
+                    </svg>
+
+                    <div class="flex space-x-4 mt-6">
+                        <div class="flex items-center text-sm font-semibold text-slate-600"><span class="w-4 h-4 bg-cyan-500 rounded-full mr-2"></span> Electron (-)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 flex justify-between">
+                <button class="btn-secondary font-bold py-2 px-6 rounded-xl tab-switch-btn" data-target="tab-1">Quay lại Hạt nhân</button>
+                <button class="btn-primary font-bold py-2 px-6 rounded-xl tab-switch-btn" data-target="tab-3">Khám phá Sự Trung hòa</button>
+            </div>
+        </div>
+
+        <!-- TAB 3: SỰ TRUNG HÒA VỀ ĐIỆN -->
+        <div id="tab-3" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                
+                <!-- Nội dung Kiến thức -->
+                <div class="bg-white p-6 rounded-[2rem] shadow-lg shadow-slate-200/50 border-l-4 border-teal-500">
+                    <h2 class="text-2xl font-extrabold text-teal-700 mb-4">3. Sự Trung Hòa Về Điện</h2>
+                    <p class="mb-4 text-slate-600 font-medium">Trong tự nhiên, mọi thứ đều thích sự cân bằng. Làng Nguyên Tử cũng vậy, một ngôi làng khỏe mạnh luôn giữ vững định lý: <strong class="text-teal-600">"Dương và Âm phải bằng nhau"</strong>. ⚖️</p>
+                    
+                    <div class="bg-slate-100 p-4 rounded-2xl mb-4 border border-slate-200">
+                        <p class="text-slate-800 font-medium leading-relaxed">
+                            Bởi vì mỗi hạt Proton mang điện tích $+1$ và mỗi hạt Electron mang điện tích $-1$, nên để toàn bộ ngôi làng (nguyên tử) không mang điện (trung hòa), số lượng người mang năng lượng dương phải bằng số người mang năng lượng âm.
+                        </p>
+                    </div>
+
+                    <div class="bg-teal-50 border border-teal-200 p-4 rounded-2xl text-center">
+                        <h3 class="font-bold text-teal-800 mb-2">Định luật vàng của Nguyên Tử:</h3>
+                        <p class="text-2xl font-bold my-4 text-teal-600 bg-white py-2 rounded-xl shadow-sm inline-block px-6">$$ Số\ p = Số\ e $$</p>
+                        <p class="text-sm text-teal-700 font-semibold">(Số Proton = Số Electron)</p>
+                    </div>
+                </div>
+
+                <!-- Interactive SVG Simulation -->
+                <div class="bg-white p-6 rounded-[2rem] shadow-lg shadow-slate-200/50 flex flex-col items-center">
+                    <h3 class="text-lg font-extrabold text-teal-700 mb-2">Mô phỏng: Cán cân Điện Tích</h3>
+                    <p class="text-sm text-slate-500 font-medium mb-4">Thêm Proton hoặc Electron để xem cân bằng</p>
+                    
+                    <svg width="300" height="200" viewBox="0 0 300 200">
+                        <!-- Trụ cân -->
+                        <polygon points="140,180 160,180 150,100" fill="#94a3b8" />
+                        <line x1="150" y1="100" x2="150" y2="180" stroke="#64748b" stroke-width="2" />
+                        <!-- Đế -->
+                        <rect x="100" y="180" width="100" height="10" rx="5" fill="#94a3b8" />
+                        
+                        <!-- Thanh đòn cân (được xoay bởi JS) -->
+                        <g id="scale-beam" class="scale-beam">
+                            <line x1="50" y1="100" x2="250" y2="100" stroke="#e2e8f0" stroke-width="8" stroke-linecap="round" />
+                            <circle cx="150" cy="100" r="6" fill="#0ea5e9" />
+                            
+                            <!-- Đĩa trái (Proton) -->
+                            <line x1="50" y1="100" x2="50" y2="140" stroke="#94a3b8" stroke-width="2" />
+                            <path d="M 20 140 Q 50 160 80 140" fill="#fef2f2" stroke="#fca5a5" stroke-width="2" />
+                            <text id="p-count-text" x="50" y="130" text-anchor="middle" font-weight="bold" fill="#ef4444" font-size="20">0</text>
+                            
+                            <!-- Đĩa phải (Electron) -->
+                            <line x1="250" y1="100" x2="250" y2="140" stroke="#94a3b8" stroke-width="2" />
+                            <path d="M 220 140 Q 250 160 280 140" fill="#ecfeff" stroke="#67e8f9" stroke-width="2" />
+                            <text id="e-count-text" x="250" y="130" text-anchor="middle" font-weight="bold" fill="#06b6d4" font-size="20">0</text>
+                        </g>
+                    </svg>
+
+                    <!-- Bảng Điều Khiển Cân -->
+                    <div class="flex justify-between w-full max-w-xs mt-6">
+                        <div class="flex flex-col items-center">
+                            <button id="add-p-btn" class="w-10 h-10 rounded-full bg-red-100 text-red-500 font-bold text-xl hover:bg-red-200 focus:outline-none shadow-sm mb-2 transition-colors">+</button>
+                            <span class="text-sm font-semibold text-red-500">Thêm Proton</span>
+                        </div>
+                        <div class="flex flex-col items-center justify-center">
+                            <button id="reset-scale-btn" class="text-xs bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl hover:bg-slate-300 transition-colors shadow-sm">Làm lại</button>
+                            <span id="scale-status" class="mt-3 text-sm font-extrabold text-slate-400">Cân bằng</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <button id="add-e-btn" class="w-10 h-10 rounded-full bg-cyan-100 text-cyan-600 font-bold text-xl hover:bg-cyan-200 focus:outline-none shadow-sm mb-2 transition-colors">+</button>
+                            <span class="text-sm font-semibold text-cyan-600">Thêm Electron</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 flex justify-between">
+                <button class="btn-secondary font-bold py-2 px-6 rounded-xl tab-switch-btn" data-target="tab-2">Quay lại Vỏ nguyên tử</button>
+                <button class="btn-primary font-bold py-2 px-6 rounded-xl tab-switch-btn" data-target="tab-test">Vào làm Bài Kiểm Tra 📝</button>
+            </div>
+        </div>
+
+        <!-- TAB KIỂM TRA (IFRAME) -->
+        <div id="tab-test" class="tab-content hidden h-[600px] flex flex-col">
+            <h2 class="text-2xl font-extrabold text-indigo-800 mb-4 text-center">Bài Tập Vận Dụng</h2>
+            <div class="flex-grow w-full border-4 border-indigo-200 rounded-[2rem] overflow-hidden shadow-xl shadow-slate-200/50 relative bg-white">
+                <!-- Nội dung fallback trong trường hợp không tải được iframe -->
+                <div class="absolute inset-0 flex items-center justify-center flex-col p-6 text-center z-0">
+                    <svg class="w-16 h-16 text-indigo-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <p class="text-indigo-500 font-medium mb-2">Trang kiểm tra sẽ tải bên trong khung này.</p>
+                    <p class="text-sm text-indigo-400">Nếu bạn đang chạy file cục bộ và thiếu file "test.html", khung này sẽ hiển thị lỗi 404.</p>
+                </div>
+                <!-- Iframe kết nối file test -->
+                <iframe src="test.html" class="w-full h-full relative z-10 bg-transparent" title="Bài kiểm tra Cấu tạo nguyên tử" onerror="this.style.display='none'"></iframe>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- XỬ LÝ JAVASCRIPT -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            /* =========================================
+               1. Hiệu Ứng Bìa Sách Mở Đầu
+               ========================================= */
+            const coverPage = document.getElementById('cover-page');
+            const startBtn = document.getElementById('start-btn');
+            
+            startBtn.addEventListener('click', () => {
+                coverPage.classList.add('cover-hidden');
+                // Tự động mở Tab Giới thiệu đầu tiên
+                openTab('tab-intro');
+            });
+
+            /* =========================================
+               2. Logic Chuyển Tab (Desktop & Mobile)
+               ========================================= */
+            const tabContents = document.querySelectorAll('.tab-content');
+            const desktopTabButtons = document.querySelectorAll('.tab-button');
+            const mobileTabButtons = document.querySelectorAll('.mobile-tab-button');
+            const triggerButtons = document.querySelectorAll('.tab-switch-btn'); // Nút chuyển next/prev
+
+            function openTab(targetId) {
+                // Đóng menu mobile nếu đang mở
+                closeMobileMenu();
+
+                // Ẩn tất cả các nội dung tab
+                tabContents.forEach(tab => {
+                    tab.classList.add('hidden');
+                });
+
+                // Hiển thị tab được chọn
+                const targetTab = document.getElementById(targetId);
+                if (targetTab) {
+                    targetTab.classList.remove('hidden');
+                    // Buộc MathJax render lại nếu công thức bị ẩn lúc trang load
+                    if (window.MathJax) {
+                        MathJax.typesetPromise([targetTab]);
+                    }
+                }
+
+                // Xóa active style trên tất cả các nút (Desktop và Mobile)
+                desktopTabButtons.forEach(btn => btn.classList.remove('active-tab'));
+                mobileTabButtons.forEach(btn => btn.classList.remove('active-mobile-tab'));
+
+                // Thêm class active cho nút Desktop tương ứng
+                const activeDesktopBtn = Array.from(desktopTabButtons).find(btn => btn.getAttribute('data-target') === targetId);
+                if (activeDesktopBtn) activeDesktopBtn.classList.add('active-tab');
+
+                // Thêm class active cho nút Mobile tương ứng
+                const activeMobileBtn = Array.from(mobileTabButtons).find(btn => btn.getAttribute('data-target') === targetId);
+                if (activeMobileBtn) activeMobileBtn.classList.add('active-mobile-tab');
+                
+                // Cuộn lên đầu nội dung
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            // Lắng nghe sự kiện click trên các nút tab Desktop
+            desktopTabButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => openTab(e.target.getAttribute('data-target')));
+            });
+
+            // Lắng nghe sự kiện click trên các nút tab Mobile
+            mobileTabButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => openTab(e.target.getAttribute('data-target')));
+            });
+
+            // Lắng nghe sự kiện trên các nút điều hướng Next/Prev trong nội dung
+            triggerButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => openTab(e.target.getAttribute('data-target')));
+            });
+
+            /* =========================================
+               3. Xử lý Mobile Sidebar Menu
+               ========================================= */
+            const mobileMenu = document.getElementById('mobile-menu');
+            const hamburgerBtn = document.getElementById('hamburger-button');
+            const closeMenuBtn = document.getElementById('close-menu-button');
+            const overlay = document.getElementById('mobile-overlay');
+
+            function openMobileMenu() {
+                mobileMenu.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            }
+
+            function closeMobileMenu() {
+                mobileMenu.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+
+            hamburgerBtn.addEventListener('click', openMobileMenu);
+            closeMenuBtn.addEventListener('click', closeMobileMenu);
+            overlay.addEventListener('click', closeMobileMenu);
+
+            /* =========================================
+               4. Logic Cân Bằng (Tab 3 Simulation)
+               ========================================= */
+            let protons = 0;
+            let electrons = 0;
+            const maxParticles = 10;
+            
+            const btnAddP = document.getElementById('add-p-btn');
+            const btnAddE = document.getElementById('add-e-btn');
+            const btnReset = document.getElementById('reset-scale-btn');
+            const textP = document.getElementById('p-count-text');
+            const textE = document.getElementById('e-count-text');
+            const beam = document.getElementById('scale-beam');
+            const statusText = document.getElementById('scale-status');
+
+            function updateScale() {
+                textP.textContent = protons;
+                textE.textContent = electrons;
+
+                // Tính toán góc nghiêng (giới hạn góc xoay tối đa)
+                let diff = protons - electrons;
+                let angle = diff * -5; // Trái nặng (P>E) -> quay ngược chiều kim đồng hồ (âm). Phải nặng (E>P) -> dương
+                
+                // Giới hạn góc nghiêng tối đa
+                if(angle > 30) angle = 30;
+                if(angle < -30) angle = -30;
+
+                beam.style.transform = `rotate(${angle}deg)`;
+
+                // Cập nhật trạng thái text
+                if (protons === 0 && electrons === 0) {
+                    statusText.textContent = "Cân bằng";
+                    statusText.className = "mt-3 text-sm font-extrabold text-slate-400";
+                } else if (protons === electrons) {
+                    statusText.textContent = "Đã Trung Hòa! ✨";
+                    statusText.className = "mt-3 text-sm font-extrabold text-teal-600";
+                } else if (protons > electrons) {
+                    statusText.textContent = "Mang điện Dương";
+                    statusText.className = "mt-3 text-sm font-extrabold text-red-500";
+                } else {
+                    statusText.textContent = "Mang điện Âm";
+                    statusText.className = "mt-3 text-sm font-extrabold text-cyan-600";
+                }
+            }
+
+            btnAddP.addEventListener('click', () => {
+                if(protons < maxParticles) {
+                    protons++;
+                    updateScale();
+                }
+            });
+
+            btnAddE.addEventListener('click', () => {
+                if(electrons < maxParticles) {
+                    electrons++;
+                    updateScale();
+                }
+            });
+
+            btnReset.addEventListener('click', () => {
+                protons = 0;
+                electrons = 0;
+                updateScale();
+            });
+
+        });
+    </script>
+</body>
+</html>
